@@ -9,29 +9,29 @@ from model import autoencoder_B
 from model import encoder, decoder_A, decoder_B
 
 
-def avg_color(img):
-    return [img[:, :, i].mean() for i in range(img.shape[-1])]
-
 def adjust_avg_color(img_old,img_new):
-    old_avg = avg_color(img_old)
-    new_avg = avg_color(img_new)
+    w,h,c = img_new.shape
     for i in range(img_new.shape[-1]):
-        diff = (int)(old_avg[i] - new_avg[i])
-        x = numpy.zeros( (160,160) )  
-        x -= diff
-        x = x.astype("uint8")
-        img_new[:, :, i] -= x
-    return img_new
+        old_avg = img_old[:, :, i].mean()
+        new_avg = img_new[:, :, i].mean()
+        diff_int = (int)(old_avg - new_avg)
+        for m in range(img_new.shape[0]):
+            for n in range(img_new.shape[1]):
+                temp = (img_new[m,n,i] + diff_int)
+                if temp < 0:
+                    img_new[m,n,i] = 0
+                elif temp > 255:
+                    img_new[m,n,i] = 255
+                else:
+                    img_new[m,n,i] = temp
 
 def smooth_mask(img_old,img_new):
-    crop = slice(0,160)
-    h= 160
-    w=160
-    mask = numpy.zeros_like(img_old)
+    w,h,c = img_new.shape
+    crop = slice(0,w)
+    mask = numpy.zeros_like(img_new)
     mask[h//15:-h//15,w//15:-w//15,:] = 255
     mask = cv2.GaussianBlur(mask,(15,15),10)
     img_new[crop,crop] = mask/255*img_new + (1-mask/255)*img_old
-    return img_new
 
 def convert_one_image( autoencoder, image ):
     use_smoothed_mask = True
@@ -49,8 +49,8 @@ def convert_one_image( autoencoder, image ):
     new_face = numpy.clip( new_face * 255, 0, 255 ).astype( image.dtype )
     new_face = cv2.resize( new_face, (160,160) )
 
-    new_face = adjust_avg_color(old_face,new_face)
-    new_face = smooth_mask(old_face,new_face)
+    adjust_avg_color(old_face,new_face)
+    smooth_mask(old_face,new_face)
 
     new_image = image.copy()
     
