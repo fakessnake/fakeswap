@@ -1,5 +1,5 @@
 import sys
-sys.path.append('./f_swap')
+sys.path.append('./face_swap')
 from PIL import Image,ImageDraw
 import imageio
 import cv2

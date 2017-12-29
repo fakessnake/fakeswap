@@ -1,5 +1,5 @@
 import sys
-sys.path.append('./f_swap')
+sys.path.append('./face_swap')
 import argparse
 import cv2
 import json
