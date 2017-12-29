@@ -1,0 +1,8 @@
+*.pyc
+*.json
+*.bin
+*.jpeg
+*.jpg
+*.png
+*.h5
+space/
